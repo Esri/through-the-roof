@@ -1,24 +1,16 @@
 import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+async function main() {
 
-setupCounter(document.querySelector('#counter'))
+  const STORY_ID = '4961e406d6364e198c71cdf3de491285';
+
+  // Create and insert the embed script manually
+  const s = document.createElement('script');
+  s.src = "https://storymaps.arcgis.com/embed/view";
+  s.setAttribute("data-story-id", STORY_ID);
+  s.setAttribute("data-root-node", ".storymaps-root");
+  document.body.appendChild(s);
+
+}
+
+main();
