@@ -12,26 +12,26 @@ const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
 async function main() {
 
   const STORY_ID = '4961e406d6364e198c71cdf3de491285';
-  const defaultLatLon = [43.6767, -70.3477]; // Lamb Street, Portland, ME
-  const LATLON = parseLatLonFromURL(); 
+  let LATLON = parseLatLonFromURL(); 
 
   if (!LATLON) {
 
     debugMessage(`⚠️ No lat/lon params provided.`);
     debugMessage(`Attempting geolocation...`);
 
-    const latlonByGeoLocation = await getLatLonByGeoLocation();
+    LATLON = await getLatLonByGeoLocation();
 
-    if (latlonByGeoLocation) {
-        debugMessage(`Location found: ${latlonByGeoLocation}`);
+    if (LATLON) {
+        debugMessage(`Location found: ${LATLON}`);
         debugMessage("Redirecting...");
-        redirectToLatLon(latlonByGeoLocation, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
     } else {
+        LATLON = [43.6767, -70.3477]; // Lamb Street, Portland, ME
         debugMessage(`⚠️ No location found.`);
-        debugMessage(`Defaulting to Lamb Street, Portland, ME, ${defaultLatLon}...`);
+        debugMessage(`Defaulting to Lamb Street, Portland, ME, ${LATLON}...`);
         debugMessage("Redirecting...");
-        redirectToLatLon(defaultLatLon, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
     }
+
+    redirectToLatLon(LATLON, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
 
     return;
 
