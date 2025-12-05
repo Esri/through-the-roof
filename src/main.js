@@ -1,5 +1,6 @@
 import './style.css'
 import { parseLatLonFromURL } from './coordinates.js'
+import { fetchTractByLatLon } from './censusApi.js'
 
 const SERVICE_ACS_POPULATION_AND_HOUSING_BASICS_TRACT = 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_10_14_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/2';
 const FIELD_MEDIAN_CONTRACT_RENT = 'B25058_001E';
@@ -8,18 +9,6 @@ const FIELD_MEDIAN_HOUSEHOLD_INCOME = 'B19049_001E';
 const FIELD_STATE = 'State';
 const FIELD_COUNTY = 'County';
 const FIELD_NAME = 'NAME';
-
-const fetchTractByLatLon = async (lat, lon) => {
-  const queryUrl = `${SERVICE_ACS_POPULATION_AND_HOUSING_BASICS_TRACT}/query?where=1%3D1&geometry=${lon}%2C${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json`;
-  const response = await fetch(queryUrl);
-  const data = await response.json();
-  
-  if (data.features && data.features.length > 0) {
-    return data.features[0]; // Return the first matching tract
-  } else {
-    throw new Error("No tract found for the given coordinates.");
-  }
-}
 
 const displayTractInfo = (tractFeature, lat, lon) => {
   const attrs = tractFeature.attributes;
@@ -60,6 +49,28 @@ const displayTractInfo = (tractFeature, lat, lon) => {
   document.body.insertBefore(infoDiv, document.body.firstChild);
 };
 
+const displayNoDataMessage = (lat, lon) => {
+  const noDataDiv = document.createElement('div');
+  noDataDiv.style.cssText = `
+    padding: 20px;
+    margin: 20px;
+    border: 1px solid #ffa726;
+    border-radius: 8px;
+    background-color: #fff3e0;
+    color: #e65100;
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+  `;
+  
+  noDataDiv.innerHTML = `
+    <h3>No Census Data Available</h3>
+    <p>No census tract data found for coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}</p>
+    <p><em>This location may be in an area not covered by the census tract boundaries, such as water bodies or remote areas.</em></p>
+  `;
+  
+  document.body.insertBefore(noDataDiv, document.body.firstChild);
+};
+
 async function main() {
 
   const STORY_ID = '4961e406d6364e198c71cdf3de491285';
@@ -67,9 +78,15 @@ async function main() {
   const LATLON = parseLatLonFromURL() || [43.6767, -70.3477]; // Default to Lamb Street, Portland, ME
 
   try {
-    const tractFeature = await fetchTractByLatLon(LATLON[0], LATLON[1]);
-    console.log("Tract Feature:", tractFeature);
-    displayTractInfo(tractFeature, LATLON[0], LATLON[1]);
+    const tractFeature = await fetchTractByLatLon(LATLON[0], LATLON[1], SERVICE_ACS_POPULATION_AND_HOUSING_BASICS_TRACT);
+    
+    if (tractFeature) {
+      console.log("Tract Feature:", tractFeature);
+      displayTractInfo(tractFeature, LATLON[0], LATLON[1]);
+    } else {
+      console.log("No tract data found for coordinates:", LATLON);
+      displayNoDataMessage(LATLON[0], LATLON[1]);
+    }
   } catch (error) {
     console.error("Error fetching tract data:", error);
     const errorDiv = document.createElement('div');
@@ -84,8 +101,8 @@ async function main() {
       max-width: 600px;
     `;
     errorDiv.innerHTML = `
-      <h3>Error Loading Tract Data</h3>
-      <p>Unable to find census tract data for coordinates: ${LATLON[0].toFixed(4)}, ${LATLON[1].toFixed(4)}</p>
+      <h3>Error Loading Data</h3>
+      <p>Failed to fetch census tract data for coordinates: ${LATLON[0].toFixed(4)}, ${LATLON[1].toFixed(4)}</p>
       <p><em>${error.message}</em></p>
     `;
     document.body.insertBefore(errorDiv, document.body.firstChild);
