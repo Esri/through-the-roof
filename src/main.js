@@ -1,14 +1,43 @@
 import './style.css'
-import { parseLatLonFromURL } from './coordinates.js'
+import { parseLatLonFromURL, getLatLonByGeoLocation } from './coordinates.js'
 import { fetchTractByLatLon } from './censusApi.js'
-import { displayTractInfo, displayNoDataMessage, displayErrorMessage } from './ui.js'
+import { displayTractInfo, displayNoDataMessage, displayErrorMessage, showTemporaryMessage } from './ui.js'
 import { CENSUS_CONFIG } from './config.js'
+import { redirectToLatLon } from './utils.js'
+
+const DEBUG_MODE = true/*new URLSearchParams(window.location.search).has("debug")*/;
+const DEBUG_MESSAGE_DURATION = 3000;
+const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
 
 async function main() {
 
   const STORY_ID = '4961e406d6364e198c71cdf3de491285';
+  const defaultLatLon = [43.6767, -70.3477]; // Lamb Street, Portland, ME
+  const LATLON = parseLatLonFromURL(); 
 
-  const LATLON = parseLatLonFromURL() || [43.6767, -70.3477]; // Default to Lamb Street, Portland, ME
+  if (!LATLON) {
+
+    debugMessage(`⚠️ No lat/lon params provided.`);
+    debugMessage(`Attempting geolocation...`);
+
+    const latlonByGeoLocation = await getLatLonByGeoLocation();
+
+    if (latlonByGeoLocation) {
+        debugMessage(`Location found: ${latlonByGeoLocation}`);
+        debugMessage("Redirecting...");
+        redirectToLatLon(latlonByGeoLocation, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
+    } else {
+        debugMessage(`⚠️ No location found.`);
+        debugMessage(`Defaulting to Lamb Street, Portland, ME, ${defaultLatLon}...`);
+        debugMessage("Redirecting...");
+        redirectToLatLon(defaultLatLon, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
+    }
+
+    return;
+
+  }
+
+
 
   // Use the Population and Housing Basics tract service for now
   const currentConfig = CENSUS_CONFIG["ACS Population and Housing Basics"].tract;

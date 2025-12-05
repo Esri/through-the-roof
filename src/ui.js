@@ -96,3 +96,18 @@ export const displayErrorMessage = (lat, lon, error) => {
   `;
   document.body.insertBefore(errorDiv, document.body.firstChild);
 };
+
+/**
+ * Display a temporary debug message
+ * @param {string} msg - Message to display
+ */
+export function showTemporaryMessage(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.padding = '0.5em';
+  div.style.fontFamily = 'sans-serif';
+  div.style.backgroundColor = '#ffeeba';
+  div.style.border = '1px solid #f0ad4e';
+  div.style.margin = '0.5em';
+  document.body.appendChild(div);
+}

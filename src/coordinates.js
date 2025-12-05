@@ -31,3 +31,25 @@ export function isValidCoordinate(lat, lon) {
          lat >= -90 && lat <= 90 && 
          lon >= -180 && lon <= 180;
 }
+
+/**
+ * Get coordinates from device geolocation
+ * @returns {Promise<number[]|null>} Array of [lat, lon] if successful, null if failed
+ */
+export async function getLatLonByGeoLocation() {
+  try {
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    });
+
+    const { latitude, longitude } = position.coords;
+    return [latitude, longitude];
+  } catch (error) {
+    console.warn("❌ Geolocation failed or was denied:", error);
+    return null;
+  }
+}
