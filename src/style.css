@@ -5,3 +5,47 @@ body {
   background-color: #f9f9f9;
   color: #333;
 }
+
+.content-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.info-panel {
+  flex: 1;
+  min-width: 0; /* Allows flex item to shrink below content size */
+}
+
+.map-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.map-placeholder {
+  height: 400px;
+  background-color: wheat;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Responsive: Stack vertically on narrow screens */
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .map-placeholder {
+    height: 300px; /* Smaller on mobile */
+  }
+}

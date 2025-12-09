@@ -11,7 +11,6 @@ export const createTractInfoCard = (tractFeature, lat, lon, fields) => {
   const infoDiv = document.createElement('div');
   infoDiv.style.cssText = `
     padding: 20px;
-    margin: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
@@ -53,7 +52,6 @@ export const createNoDataMessageCard = (lat, lon) => {
   const noDataDiv = document.createElement('div');
   noDataDiv.style.cssText = `
     padding: 20px;
-    margin: 20px;
     border: 1px solid #ffa726;
     border-radius: 8px;
     background-color: #fff3e0;

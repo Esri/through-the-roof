@@ -45,16 +45,35 @@ async function main() {
   try {
     const tractFeature = await fetchTractByLatLon(latLon[0], latLon[1], currentConfig.url);
     
+    let card;
     if (tractFeature) {
       console.log("Tract Feature:", tractFeature);
-      const infoCard = createTractInfoCard(tractFeature, latLon[0], latLon[1], currentConfig.fields);
-      document.body.insertBefore(infoCard, document.body.firstChild);
+      card = createTractInfoCard(tractFeature, latLon[0], latLon[1], currentConfig.fields);
     } else {
       console.log("No tract data found for coordinates:", latLon);
-      const noDataCard = createNoDataMessageCard(latLon[0], latLon[1]);
-      document.body.insertBefore(noDataCard, document.body.firstChild);
+      card = createNoDataMessageCard(latLon[0], latLon[1]);
+      console.log("Created no data message card");
     }
 
+    const divContentContainer = document.createElement('div');
+    divContentContainer.className = 'content-container';
+
+    const divInfoPanel = document.createElement('div');
+    divInfoPanel.className = 'info-panel';
+    divInfoPanel.appendChild(card);
+
+    const divMap = document.createElement('div');
+    divMap.className = 'map-placeholder';
+    divMap.innerHTML = `Your map will appear here. (Map functionality to be implemented)`;
+
+    const divMapPanel = document.createElement('div');
+    divMapPanel.className = 'map-panel';
+    divMapPanel.appendChild(divMap);
+
+    divContentContainer.appendChild(divInfoPanel);
+    divContentContainer.appendChild(divMapPanel);
+
+    document.body.insertBefore(divContentContainer, document.body.firstChild);
   } catch (error) {
     console.error("Error fetching tract data:", error);
     displayErrorMessage(latLon[0], latLon[1], error);
