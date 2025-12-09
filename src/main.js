@@ -41,9 +41,21 @@ async function main() {
   // Use the Population and Housing Basics tract service for now
   const currentConfig = CENSUS_CONFIG["ACS Population and Housing Basics"].tract;
 
+  // Show loading spinner for tract data query
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.innerHTML = `
+    <div class="spinner"></div>
+    <div class="spinner-text">Loading census tract data...</div>
+  `;
+  document.body.appendChild(loadingDiv);
+
   try {
     const tractFeature = await fetchTractByLatLon(latLon[0], latLon[1], currentConfig.url);
-    
+
+    // Remove loading spinner
+    document.body.removeChild(loadingDiv);
+
     let card;
     if (tractFeature) {
       console.log("Tract Feature:", tractFeature);
@@ -74,8 +86,12 @@ async function main() {
     document.body.insertBefore(divContentContainer, document.body.firstChild);
 
     await initializeMap(divMap, latLon);
-
+      
   } catch (error) {
+    // Remove loading spinner on error
+    if (document.body.contains(loadingDiv)) {
+      document.body.removeChild(loadingDiv);
+    }
     console.error("Error fetching tract data:", error);
     displayErrorMessage(latLon[0], latLon[1], error);
   }
