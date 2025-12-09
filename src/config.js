@@ -4,7 +4,7 @@
 export const CENSUS_CONFIG = {
   "ACS Population and Housing Basics": {
     tract: {
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_10_14_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/2',
+      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/2',
       fields: {
         name: 'NAME',
         state: 'State',
@@ -15,7 +15,7 @@ export const CENSUS_CONFIG = {
       }
     },
     state: {
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_10_14_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/0',
+      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/0',
       fields: {
         name: 'NAME',
         medianContractRent: 'B25058_001E',
