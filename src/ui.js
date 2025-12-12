@@ -183,3 +183,129 @@ export function showTemporaryMessage(msg) {
   div.style.margin = '0.5em';
   document.body.appendChild(div);
 }
+
+/**
+ * Display zip code housing affordability information in a styled card
+ * @param {number[]} latLon - Array containing latitude and longitude coordinates
+ * @param {Object} zipData - Zip code attributes object
+ * @param {Object} stateData - State attributes object for comparison
+ * @param {Object} fieldMappings - Object containing field name mappings for zip and state data
+ * @param {Function} onFindLocationClick - Click handler for the Find New Location button
+ */
+export const createZipCard = (latLon, zipData, stateData, nationData, fieldMappings, onFindLocationClick) => {
+  const lat = latLon[0];
+  const lon = latLon[1];
+  
+  const infoDiv = document.createElement('div');
+  infoDiv.style.cssText = `
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+  `;
+  
+  const formatCurrency = (value) => {
+    if (!value || value < 0) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+  
+  const formatNumber = (value) => {
+    if (!value || value < 0) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+      maximumFractionDigits: 1
+    }).format(value);
+  };
+  
+  // Extract zip data using field mappings
+  const zipId = zipData?.[fieldMappings.zip.id] || 'Unknown';
+  const zipName = zipData?.[fieldMappings.zip.name] || 'Unknown';
+  const zipMedianHomeValue = zipData?.[fieldMappings.zip.medianHomeValue];
+  const zipMedianHouseholdIncome = zipData?.[fieldMappings.zip.mediaHouseholdIncome];
+  const zipHousingAffordabilityIndex = zipData?.[fieldMappings.zip.housingAffordabilityIndex];
+  
+  // Extract state data using field mappings
+  const stateName = stateData?.[fieldMappings.state.name] || 'Unknown';
+  const stateMedianHomeValue = stateData?.[fieldMappings.state.medianHomeValue];
+  const stateMedianHouseholdIncome = stateData?.[fieldMappings.state.mediaHouseholdIncome];
+  const stateHousingAffordabilityIndex = stateData?.[fieldMappings.state.housingAffordabilityIndex];
+  
+  // Extract nation data using field mappings
+  const nationName = nationData?.[fieldMappings.nation.name] || 'Unknown';
+  const nationMedianHomeValue = nationData?.[fieldMappings.nation.medianHomeValue];
+  const nationMedianHouseholdIncome = nationData?.[fieldMappings.nation.mediaHouseholdIncome];
+  const nationHousingAffordabilityIndex = nationData?.[fieldMappings.nation.housingAffordabilityIndex];
+  
+  infoDiv.innerHTML = `
+    <h2>Housing Affordability Information</h2>
+    <p style="position: relative;"><span style="display: inline-block; width: 80px;">Location:</span><strong>${lat.toFixed(4)}, ${lon.toFixed(4)}</strong> 
+      <button id="find-location-btn" style="
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        position: absolute;
+        right: 0;
+        top: 2px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      ">
+        🔍 Find New Location
+      </button>
+    </p>
+    <p><span style="display: inline-block; width: 80px;">Zip Code:</span><strong>${zipId}</strong></p>
+    <p><span style="display: inline-block; width: 80px;">Area:</span><strong>${zipName}</strong></p>
+    <hr>
+    
+    <h3>Housing Affordability Comparison</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+        <tr style="background-color: #e9ecef;">
+          <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">Metric</th>
+          <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${zipName}</th>
+          <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${stateName}</th>
+          <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${nationName}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #dee2e6;">Median Home Value</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatCurrency(zipMedianHomeValue)}</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatCurrency(stateMedianHomeValue)}</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatCurrency(nationMedianHomeValue)}</td>
+        </tr>
+        <tr style="background-color: #f8f9fa;">
+          <td style="padding: 8px; border: 1px solid #dee2e6;">Median Household Income</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatCurrency(zipMedianHouseholdIncome)}</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatCurrency(stateMedianHouseholdIncome)}</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatCurrency(nationMedianHouseholdIncome)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #dee2e6;">Housing Affordability Index</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatNumber(zipHousingAffordabilityIndex)}</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatNumber(stateHousingAffordabilityIndex)}</td>
+          <td style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${formatNumber(nationHousingAffordabilityIndex)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  // Add click handler for Find Location button
+  if (onFindLocationClick) {
+    const button = infoDiv.querySelector('#find-location-btn');
+    if (button) {
+      button.addEventListener('click', onFindLocationClick);
+    }
+  }
+
+  return infoDiv;
+};

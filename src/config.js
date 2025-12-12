@@ -1,47 +1,34 @@
 /**
- * Configuration for Census ACS (American Community Survey) services and field mappings
+ * Configuration for services and field mappings
  */
 export const CENSUS_CONFIG = {
-  "ACS Population and Housing Basics": {
-    tract: {
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/2',
+  "Housing Affordability Index 2025": {
+    zip: {
+      url: 'https://services8.arcgis.com/peDZJliSvYims39Q/ArcGIS/rest/services/USA_Latest_Esri_Demographics/FeatureServer/1',
       fields: {
+        id: 'ID',
         name: 'NAME',
-        county: 'County',
-        state: 'State',
-        medianContractRent: 'B25058_001E',
-        medianHomeValue: 'B25077_001E',
-        medianIncome: 'B19049_001E'
+        medianHomeValue: 'MEDVAL_CY',
+        mediaHouseholdIncome: 'MEDHINC_CY',
+        housingAffordabilityIndex: 'HAI_CY'
       }
     },
     state: {
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Highlights_Population_Housing_Basics_Boundaries/FeatureServer/0',
+      url: 'https://services8.arcgis.com/peDZJliSvYims39Q/ArcGIS/rest/services/USA_Latest_Esri_Demographics/FeatureServer/2',
       fields: {
-        name: 'NAME',
-        medianContractRent: 'B25058_001E',
-        medianHomeValue: 'B25077_001E',
-        medianIncome: 'B19049_001E'
+        name: 'NAME', 
+        medianHomeValue: 'MEDVAL_CY',
+        mediaHouseholdIncome: 'MEDHINC_CY',
+        housingAffordabilityIndex: 'HAI_CY'
       }
-    }
-  },
-  "ACS Housing Costs": {
-    /*
-    tract: {
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Housing_Costs_Boundaries/FeatureServer/2',
+    },
+    nation: {
+      url: 'https://services8.arcgis.com/peDZJliSvYims39Q/ArcGIS/rest/services/USA_Latest_Esri_Demographics/FeatureServer/0',
       fields: {
-        name: 'NAME',
-        state: 'State',
-        county: 'County',
-        medianContractRent: 'B25058_001E',
-        medianHomeValue: 'B25077_001E'
-      }
-    },*/
-    state: {
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Housing_Costs_Boundaries/FeatureServer/0',
-      fields: {
-        name: 'NAME',
-        pctRentersSpendingMoreThan30Pct: 'B25070_calc_pctGE30pctE',
-        pctOwnersSpendingMoreThan30Pct: 'B25091_calc_pctNoMortGE30pctE'
+        name: 'NAME', 
+        medianHomeValue: 'MEDVAL_CY',
+        mediaHouseholdIncome: 'MEDHINC_CY',
+        housingAffordabilityIndex: 'HAI_CY'
       }
     }
   }

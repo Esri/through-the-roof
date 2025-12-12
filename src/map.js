@@ -1,4 +1,4 @@
-export async function initializeMap(mapDiv, latLon, tractFeature, tractServiceUrl) {
+export async function initializeMap(mapDiv, latLon, zipFeature, zipServiceUrl) {
 
   const [Map, MapView, Point, Graphic, SimpleMarkerSymbol, FeatureLayer] =
     await $arcgis.import([
@@ -50,38 +50,38 @@ export async function initializeMap(mapDiv, latLon, tractFeature, tractServiceUr
   view.graphics.add(locationGraphic);
   console.log("Added location marker to map.");
 
-  // Add tract boundary as FeatureLayer (only if we have tract data)
-  if (tractFeature && tractFeature.attributes && tractFeature.attributes.GEOID) {
-    const tractLayer = new FeatureLayer({
-      url: tractServiceUrl,
+  // Add zip boundary as FeatureLayer (only if we have zip data)
+  if (zipFeature && zipFeature.attributes && zipFeature.attributes.ID) {
+    const zipLayer = new FeatureLayer({
+      url: zipServiceUrl,
       outFields: ["*"],
-      definitionExpression: `GEOID = '${tractFeature.attributes.GEOID}'`, // Filter to just this tract
+      definitionExpression: `ID = '${zipFeature.attributes.ID}'`, // Filter to just this zip code
       renderer: {
         type: "simple",
         symbol: {
           type: "simple-fill",
-          color: [255, 0, 0, 0.3], // Semi-transparent red
+          color: [0, 123, 255, 0.3], // Semi-transparent blue
           outline: {
-            color: [255, 0, 0],
+            color: [0, 123, 255],
             width: 2
           }
         }
       }
     });
     
-    map.add(tractLayer);
-    console.log("Added tract layer");
+    map.add(zipLayer);
+    console.log("Added zip layer");
 
-    // Wait for tract layer to load and zoom to its extent
-    await tractLayer.when();
-    console.log("Tract layer loaded");
+    // Wait for zip layer to load and zoom to its extent
+    await zipLayer.when();
+    console.log("Zip layer loaded");
     
-    // Query the layer to get the extent of the filtered tract
-    const query = tractLayer.createQuery();
-    const result = await tractLayer.queryExtent(query);
+    // Query the layer to get the extent of the filtered zip code
+    const query = zipLayer.createQuery();
+    const result = await zipLayer.queryExtent(query);
     
     if (result.extent) {
-      console.log("Zooming to tract extent:", result.extent);
+      console.log("Zooming to zip extent:", result.extent);
       await view.goTo(result.extent.expand(1.2)); // Add some padding
     }
 

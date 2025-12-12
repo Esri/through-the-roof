@@ -1,7 +1,7 @@
 import './style.css'
 import { parseLatLonFromURL, getLatLonByGeoLocation } from './coordinates.js'
 import { fetchFeatureByLatLon } from './censusApi.js'
-import { createTractInfoCard, createNoDataMessageCard, displayErrorMessage, showTemporaryMessage } from './ui.js'
+import { createZipCard, createNoDataMessageCard, displayErrorMessage, showTemporaryMessage } from './ui.js'
 import { showAddressModal } from './addressModal.js'
 import { CENSUS_CONFIG } from './config.js'
 import { redirectToLatLon } from './utils.js'
@@ -72,52 +72,45 @@ async function main() {
 
   }
 
-  // Use the Population and Housing Basics tract service for now
-  const currentConfig = CENSUS_CONFIG["ACS Population and Housing Basics"].tract;
-
-  // Show loading spinner for tract data query
+  // Show loading spinner for data query
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'loading';
   loadingDiv.innerHTML = `
     <div class="spinner"></div>
-    <div class="spinner-text">Loading census tract data...</div>
+    <div class="spinner-text">Loading data...</div>
   `;
   document.body.appendChild(loadingDiv);
 
   try {
 
-    const tractFeature = await fetchFeatureByLatLon(latLon, currentConfig.url);
-    const stateFeature1 = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["ACS Population and Housing Basics"].state.url);
-    const stateFeature2 = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["ACS Housing Costs"].state.url);
-
-    console.log(stateFeature1);
-    console.log(stateFeature2);
+    const zipFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
+    const stateFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].state.url);
+    const nationFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url);
 
     // Remove loading spinner
     document.body.removeChild(loadingDiv);
 
     let card;
-    if (tractFeature) {
-      console.log("Tract Feature:", tractFeature);
+    if (zipFeature && stateFeature && nationFeature) {
       
       // Create field mappings object
       const fieldMappings = {
-        tract: CENSUS_CONFIG["ACS Population and Housing Basics"].tract.fields,
-        state1: CENSUS_CONFIG["ACS Population and Housing Basics"].state.fields,
-        state2: CENSUS_CONFIG["ACS Housing Costs"].state.fields
+        zip: CENSUS_CONFIG["Housing Affordability Index 2025"].zip.fields,
+        state: CENSUS_CONFIG["Housing Affordability Index 2025"].state.fields,
+        nation: CENSUS_CONFIG["Housing Affordability Index 2025"].nation.fields
       };
       
-      card = createTractInfoCard(
+      card = createZipCard(
         latLon, 
-        tractFeature.attributes,
-        stateFeature1?.attributes,
-        stateFeature2?.attributes,
+        zipFeature.attributes,
+        stateFeature.attributes,
+        nationFeature.attributes,
         fieldMappings,
         handleFindLocation
       );
-      console.log("Created tract info card");
+      console.log("Created zip info card");
     } else {
-      console.log("No tract data found for coordinates:", latLon);
+      console.log("No zip data found for coordinates:", latLon);
       card = createNoDataMessageCard(latLon);
       console.log("Created no data message card");
     }
@@ -141,14 +134,14 @@ async function main() {
 
     document.body.insertBefore(divContentContainer, document.body.firstChild);
 
-    await initializeMap(divMap, latLon, tractFeature, currentConfig.url);
+    await initializeMap(divMap, latLon, zipFeature, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
       
   } catch (error) {
     // Remove loading spinner on error
     if (document.body.contains(loadingDiv)) {
       document.body.removeChild(loadingDiv);
     }
-    console.error("Error fetching tract data:", error);
+    console.error("Error fetching data:", error);
     displayErrorMessage(latLon[0], latLon[1], error);
   }
 
