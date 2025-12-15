@@ -271,7 +271,7 @@ export const createZipCard = (latLon, zipData, stateData, nationData, fieldMappi
       <thead>
         <tr style="background-color: #e9ecef;">
           <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">Metric</th>
-          <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${zipName}</th>
+          <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${zipId}</th>
           <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${stateName}</th>
           <th style="padding: 8px; text-align: right; border: 1px solid #dee2e6;">${nationName}</th>
         </tr>
