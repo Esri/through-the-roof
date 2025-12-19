@@ -192,9 +192,7 @@ export function showTemporaryMessage(msg) {
  * @param {Object} fieldMappings - Object containing field name mappings for zip and state data
  * @param {Function} onFindLocationClick - Click handler for the Find New Location button
  */
-export const createZipCard = (latLon, zipData, stateData, nationData, fieldMappings, onFindLocationClick) => {
-  const lat = latLon[0];
-  const lon = latLon[1];
+export const createZipCard = (zipData, stateData, nationData, fieldMappings, onFindLocationClick) => {
   
   const infoDiv = document.createElement('div');
   infoDiv.style.cssText = `
@@ -243,7 +241,8 @@ export const createZipCard = (latLon, zipData, stateData, nationData, fieldMappi
   
   infoDiv.innerHTML = `
     <h2>Housing Affordability Information</h2>
-    <p style="position: relative;"><span style="display: inline-block; width: 80px;">Location:</span><strong>${lat.toFixed(4)}, ${lon.toFixed(4)}</strong> 
+    <p style="position: relative;">
+      <span style="display: inline-block; width: 80px;">Zip Code:</span><strong>${zipId}</strong>
       <button id="find-location-btn" style="
         background-color: #007bff;
         color: white;
@@ -254,15 +253,15 @@ export const createZipCard = (latLon, zipData, stateData, nationData, fieldMappi
         font-size: 12px;
         position: absolute;
         right: 0;
-        top: 2px;
+        top: -6px;
         display: inline-flex;
         align-items: center;
         gap: 4px;
       ">
-        🔍 Find New Location
+        🔍 Change Zip
       </button>
+
     </p>
-    <p><span style="display: inline-block; width: 80px;">Zip Code:</span><strong>${zipId}</strong></p>
     <p><span style="display: inline-block; width: 80px;">Area:</span><strong>${zipName}</strong></p>
     <hr>
     

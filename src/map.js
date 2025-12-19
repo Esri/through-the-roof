@@ -1,12 +1,9 @@
 export async function initializeMap(mapDiv, latLon, zipFeature, zipServiceUrl) {
 
-  const [Map, MapView, Point, Graphic, SimpleMarkerSymbol, FeatureLayer] =
+  const [Map, MapView, FeatureLayer] =
     await $arcgis.import([
       "esri/Map",
       "esri/views/MapView",
-      "esri/geometry/Point",
-      "esri/Graphic",
-      "esri/symbols/SimpleMarkerSymbol",
       "esri/layers/FeatureLayer"
     ]);
 
@@ -26,29 +23,6 @@ export async function initializeMap(mapDiv, latLon, zipFeature, zipServiceUrl) {
   // Wait for the view to be ready
   await view.when();
   console.log("Map view is ready!");
-
-  // Add location marker
-  const locationPoint = new Point({
-    longitude: latLon[1],
-    latitude: latLon[0]
-  });
-
-  const markerSymbol = new SimpleMarkerSymbol({
-    color: [226, 119, 40], // Orange
-    size: 12,
-    outline: {
-      color: [255, 255, 255],
-      width: 2
-    }
-  });
-
-  const locationGraphic = new Graphic({
-    geometry: locationPoint,
-    symbol: markerSymbol
-  });
-
-  view.graphics.add(locationGraphic);
-  console.log("Added location marker to map.");
 
   // Add zip boundary as FeatureLayer (only if we have zip data)
   if (zipFeature && zipFeature.attributes && zipFeature.attributes.ID) {
