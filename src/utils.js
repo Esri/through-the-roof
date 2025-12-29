@@ -14,3 +14,21 @@ export function redirectToZip(zip, delay) {
     window.location.href = targetUrl;
   }
 }
+
+/**
+ * Waits for an element matching the selector to appear in the DOM, then executes a callback
+ * @param {string} selector - CSS selector to search for
+ * @param {Function} callback - Function to execute when element is found, receives the element as parameter
+ */
+export function waitForElement(selector, callback) {
+  const interval = setInterval(
+		() => {
+			const element = document.querySelector(selector);
+			if (element) {
+				clearInterval(interval);
+				callback(element);
+			}
+	  }, 
+		100
+	);
+}

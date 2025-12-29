@@ -1,11 +1,11 @@
 import './style.css'
 import { fetchZipDetails, getZipByGeoLocation } from './zipService.js'
 import { fetchFeatureByLatLon } from './censusApi.js'
-import { createZipCard, createNoDataMessageCard, displayErrorMessage, showTemporaryMessage } from './ui.js'
+import { displayErrorMessage, showTemporaryMessage } from './ui.js'
 import { showZipModal } from './zipModal.js'
 import { CENSUS_CONFIG } from './config.js'
-import { redirectToZip } from './utils.js'
-import { initializeMap } from './map.js'
+import { redirectToZip, waitForElement } from './utils.js'
+import { createStoryProxy } from './storyProxy.js'
 
 const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
 const DEBUG_MESSAGE_DURATION = 3000;
@@ -34,7 +34,7 @@ const handleFindZip = () => {
 
 async function main() {
 
-  const STORY_ID = '4961e406d6364e198c71cdf3de491285';
+  const STORY_ID = '0caacd3051ed4d788d167a67aad2816a';
 
   // Parse the ZIP code from the query string
   const params = new URLSearchParams(window.location.search);
@@ -87,59 +87,22 @@ async function main() {
   `;
   document.body.appendChild(loadingDiv);
 
+  let zipFeature, stateFeature, nationFeature;
+
   try {
 
-    const zipFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
-    const stateFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].state.url);
-    const nationFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url);
+    zipFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
+    stateFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].state.url);
+    nationFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url);
 
     // Remove loading spinner
     document.body.removeChild(loadingDiv);
 
-    let card;
     if (zipFeature && stateFeature && nationFeature) {
-      
-      // Create field mappings object
-      const fieldMappings = {
-        zip: CENSUS_CONFIG["Housing Affordability Index 2025"].zip.fields,
-        state: CENSUS_CONFIG["Housing Affordability Index 2025"].state.fields,
-        nation: CENSUS_CONFIG["Housing Affordability Index 2025"].nation.fields
-      };
-      
-      card = createZipCard(
-        zipFeature.attributes,
-        stateFeature.attributes,
-        nationFeature.attributes,
-        fieldMappings,
-        handleFindZip
-      );
-      console.log("Created zip info card");
+      console.log("Data retrieval successful.");      
     } else {
       console.log("No zip data found for coordinates:", latLon);
-      card = createNoDataMessageCard(latLon);
-      console.log("Created no data message card");
     }
-
-    const divContentContainer = document.createElement('div');
-    divContentContainer.className = 'content-container';
-
-    const divInfoPanel = document.createElement('div');
-    divInfoPanel.className = 'info-panel';
-    divInfoPanel.appendChild(card);
-
-    const divMap = document.createElement('div');
-    divMap.className = 'map';
-
-    const divMapPanel = document.createElement('div');
-    divMapPanel.className = 'map-panel';
-    divMapPanel.appendChild(divMap);
-
-    divContentContainer.appendChild(divInfoPanel);
-    divContentContainer.appendChild(divMapPanel);
-
-    document.body.insertBefore(divContentContainer, document.body.firstChild);
-
-    await initializeMap(divMap, latLon, zipFeature, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
       
   } catch (error) {
     // Remove loading spinner on error
@@ -150,14 +113,56 @@ async function main() {
     displayErrorMessage(latLon[0], latLon[1], error);
   }
 
-  /*
+  // Set up fetch proxy with custom substitution logic
+
+  const storyProxy = createStoryProxy(
+    `/embed/view/${STORY_ID}/data`, 
+    (json) => {
+      for (const nodeId in json.publishedData.nodes) {
+        const node = json.publishedData.nodes[nodeId];
+        console.log(node.type, nodeId, node);
+        switch(nodeId) {
+          case 'n-zjAbcQ':
+            node.data.text = `Housing Affordability Comparison for Zip Code ${zipFeature.attributes.ID}!`;
+            break;
+          case 'n-s5BlpJ':
+            node.data.caption = `Zip code ${zipFeature.attributes.ID} (City, State)`;
+            break;
+          default:
+            break;
+        }          
+      }
+    }  
+  );
+
+  window.fetch = storyProxy;
+
   // Create and insert the embed script manually
   const s = document.createElement('script');
   s.src = "https://storymaps.arcgis.com/embed/view";
   s.setAttribute("data-story-id", STORY_ID);
   s.setAttribute("data-root-node", ".storymaps-root");
   document.body.appendChild(s);
-  */
+
+  // override the first occurence of hyperlink to run the promptZipChange function
+  // on click
+
+  waitForElement(
+    '.storymaps-root a', 
+    (link) => {
+        link.href = "#"; // Enables keyboard focus and enter key
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          handleFindZip();
+        });
+        link.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleFindZip();
+          }
+        });
+    }
+  );
 
 }
 
