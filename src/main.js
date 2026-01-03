@@ -116,89 +116,100 @@ async function main() {
   // Set up fetch proxy with custom substitution logic
 
   const storyProxy = createStoryProxy(
-    `/embed/view/${STORY_ID}/data`, 
-    (json) => {
-
-      // remove any extent data associated with webmap nodes
-      Object.entries(json.publishedData.nodes)
-        .filter(([_, resource]) => resource.type === "webmap")
-        .forEach(([_, webmapNode]) => {
-          console.log("Modifying webmap node extent:", webmapNode);
-          delete webmapNode.data.extent;
-          delete webmapNode.data.center;
-          delete webmapNode.data.viewpoint;
-          delete webmapNode.data.zoom;
+    [
+      {
+        url: `f04797b9c2654a5fa05f5df911f2795c/data`,
+        subsitutionFn: (json) => {
+          json.operationalLayers[0].layerDefinition.definitionExpression = `ID = '${zipFeature.attributes.ID}'`;
         }
-      );
-      
-      // modify the extent for each of the webmap resources
-      Object.entries(json.publishedData.resources)
-        .filter(([_, resource]) => resource.type === "webmap")
-        .forEach(([_, webmapResource]) => {
-          console.log("Modifying webmap resource extent:", webmapResource);
-          console.log("Zip Feature:", zipDetails);
+      },
+      {
+        url: `/embed/view/${STORY_ID}/data`, 
+        subsitutionFn:     
+        (json) => {
 
-          const bufferedExtent = (env, buffer = 0.01) => {
-            return {
-              xmin: env.xmin - buffer,
-              ymin: env.ymin - buffer,
-              xmax: env.xmax + buffer,
-              ymax: env.ymax + buffer,
-              spatialReference: { wkid: 4326 }
-            };
-          }
-
-          const extentWithBuffer = bufferedExtent(zipDetails.envelope, 0.02);
-
-          webmapResource.data.viewpoint = {
-            rotation: 0,
-            scale: null,
-            targetGeometry: {
-              xmin: extentWithBuffer.xmin,
-              ymin: extentWithBuffer.ymin,
-              xmax: extentWithBuffer.xmax,
-              ymax: extentWithBuffer.ymax,
-              spatialReference: { wkid: 4326 }
+          // remove any extent data associated with webmap nodes
+          Object.entries(json.publishedData.nodes)
+            .filter(([_, resource]) => resource.type === "webmap")
+            .forEach(([_, webmapNode]) => {
+              console.log("Modifying webmap node extent:", webmapNode);
+              delete webmapNode.data.extent;
+              delete webmapNode.data.center;
+              delete webmapNode.data.viewpoint;
+              delete webmapNode.data.zoom;
             }
-          };
+          );
+        
+          // modify the extent for each of the webmap resources
+          Object.entries(json.publishedData.resources)
+            .filter(([_, resource]) => resource.type === "webmap")
+            .forEach(([_, webmapResource]) => {
+              console.log("Modifying webmap resource extent:", webmapResource);
+              console.log("Zip Feature:", zipDetails);
 
-          delete webmapResource.data.extent;
+              const bufferedExtent = (env, buffer = 0.01) => {
+                return {
+                  xmin: env.xmin - buffer,
+                  ymin: env.ymin - buffer,
+                  xmax: env.xmax + buffer,
+                  ymax: env.ymax + buffer,
+                  spatialReference: { wkid: 4326 }
+                };
+              }
 
-        }
-      );
-      
-      for (const nodeId in json.publishedData.nodes) {
-        const node = json.publishedData.nodes[nodeId];
-        console.log(node.type, nodeId, node);
-        switch(nodeId) {
-          case 'n-zjAbcQ':
-            node.data.text = `Housing Affordability Comparison for Zip Code ${zipFeature.attributes.ID}!`;
-            break;
-          case 'n-s5BlpJ':
-            node.data.caption = `Zip code ${zipFeature.attributes.ID} (${zipFeature.attributes.NAME}, ${zipFeature.attributes.ST_ABBREV})`;
-            break;
-          case 'n-HG38Yi':
-            // headers
-            node.data.cells[0][1].value = zipFeature.attributes.ID;
-            node.data.cells[0][2].value = stateFeature.attributes.NAME;
-            // median home value
-            node.data.cells[1][1].value = zipFeature.attributes.MEDVAL_CY.toLocaleString();
-            node.data.cells[1][2].value = stateFeature.attributes.MEDVAL_CY.toLocaleString();
-            node.data.cells[1][3].value = nationFeature.attributes.MEDVAL_CY.toLocaleString();
-            // median household income
-            node.data.cells[2][1].value = zipFeature.attributes.MEDHINC_CY.toLocaleString();
-            node.data.cells[2][2].value = stateFeature.attributes.MEDHINC_CY.toLocaleString();
-            node.data.cells[2][3].value = nationFeature.attributes.MEDHINC_CY.toLocaleString();
-            // affordability index
-            node.data.cells[3][1].value = zipFeature.attributes.HAI_CY.toFixed(0);
-            node.data.cells[3][2].value = stateFeature.attributes.HAI_CY.toFixed(0);
-            node.data.cells[3][3].value = nationFeature.attributes.HAI_CY.toFixed(0);
-            break;
-          default:
-            break;
-        }          
+              const extentWithBuffer = bufferedExtent(zipDetails.envelope, 0.02);
+
+              webmapResource.data.viewpoint = {
+                rotation: 0,
+                scale: null,
+                targetGeometry: {
+                  xmin: extentWithBuffer.xmin,
+                  ymin: extentWithBuffer.ymin,
+                  xmax: extentWithBuffer.xmax,
+                  ymax: extentWithBuffer.ymax,
+                  spatialReference: { wkid: 4326 }
+                }
+              };
+
+              delete webmapResource.data.extent;
+
+            }
+          );
+        
+          for (const nodeId in json.publishedData.nodes) {
+            const node = json.publishedData.nodes[nodeId];
+            console.log(node.type, nodeId, node);
+            switch(nodeId) {
+              case 'n-zjAbcQ':
+                node.data.text = `Housing Affordability Comparison for Zip Code ${zipFeature.attributes.ID}!`;
+                break;
+              case 'n-s5BlpJ':
+                node.data.caption = `Zip code ${zipFeature.attributes.ID} (${zipFeature.attributes.NAME}, ${zipFeature.attributes.ST_ABBREV})`;
+                break;
+              case 'n-HG38Yi':
+                // headers
+                node.data.cells[0][1].value = zipFeature.attributes.ID;
+                node.data.cells[0][2].value = stateFeature.attributes.NAME;
+                // median home value
+                node.data.cells[1][1].value = zipFeature.attributes.MEDVAL_CY.toLocaleString();
+                node.data.cells[1][2].value = stateFeature.attributes.MEDVAL_CY.toLocaleString();
+                node.data.cells[1][3].value = nationFeature.attributes.MEDVAL_CY.toLocaleString();
+                // median household income
+                node.data.cells[2][1].value = zipFeature.attributes.MEDHINC_CY.toLocaleString();
+                node.data.cells[2][2].value = stateFeature.attributes.MEDHINC_CY.toLocaleString();
+                node.data.cells[2][3].value = nationFeature.attributes.MEDHINC_CY.toLocaleString();
+                // affordability index
+                node.data.cells[3][1].value = zipFeature.attributes.HAI_CY.toFixed(0);
+                node.data.cells[3][2].value = stateFeature.attributes.HAI_CY.toFixed(0);
+                node.data.cells[3][3].value = nationFeature.attributes.HAI_CY.toFixed(0);
+                break;
+              default:
+                break;
+            }          
+          }
+        }  
       }
-    }  
+    ]
   );
 
   window.fetch = storyProxy;
