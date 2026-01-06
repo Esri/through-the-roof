@@ -118,12 +118,14 @@ async function main() {
   const storyProxy = createStoryProxy(
     [
       {
+        /* map substitutions */
         url: `f04797b9c2654a5fa05f5df911f2795c/data`,
         subsitutionFn: (json) => {
           json.operationalLayers[0].layerDefinition.definitionExpression = `ID = '${zipFeature.attributes.ID}'`;
         }
       },
       {
+        /* story data substitutions */
         url: `/embed/view/${STORY_ID}/data`, 
         subsitutionFn:     
         (json) => {
@@ -139,7 +141,16 @@ async function main() {
               delete webmapNode.data.zoom;
             }
           );
-        
+
+          // modify popup ObjectID for each of the webmap nodes
+          Object.entries(json.publishedData.nodes)
+            .filter(([_, resource]) => resource.type === "webmap")
+            .forEach(([_, webmapNode]) => {
+              console.log("Modifying popup ObjectID:", webmapNode.data.pinnedPopupInfo.idFieldValue);
+              webmapNode.data.pinnedPopupInfo.idFieldValue = zipFeature.attributes.OBJECTID;
+            }
+          );
+          
           // modify the extent for each of the webmap resources
           Object.entries(json.publishedData.resources)
             .filter(([_, resource]) => resource.type === "webmap")
