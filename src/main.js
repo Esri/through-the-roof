@@ -125,6 +125,18 @@ async function main() {
         }
       },
       {
+        url: `chart_details_1767799538210.json`,
+        subsitutionFn: (json) => {
+          console.log("Modifying chart data JSON:", json);
+          json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
+          json.inlineData.dataItems[0].field1 = zipFeature.attributes.MEDHINC_CY;
+          json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
+          json.inlineData.dataItems[1].field1 = stateFeature.attributes.MEDHINC_CY;
+          json.inlineData.dataItems[2].category = nationFeature.attributes.NAME;
+          json.inlineData.dataItems[2].field1 = nationFeature.attributes.MEDHINC_CY;
+        }
+      },
+      {
         /* story data substitutions */
         url: `/embed/view/${STORY_ID}/data`, 
         subsitutionFn:     
