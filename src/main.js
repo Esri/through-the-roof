@@ -34,7 +34,7 @@ const handleFindZip = () => {
 
 async function main() {
 
-  const STORY_ID = '0caacd3051ed4d788d167a67aad2816a';
+  const STORY_ID = '4961e406d6364e198c71cdf3de491285';
 
   // Parse the ZIP code from the query string
   const params = new URLSearchParams(window.location.search);
@@ -118,14 +118,7 @@ async function main() {
   const storyProxy = createStoryProxy(
     [
       {
-        /* map substitutions */
-        url: `f04797b9c2654a5fa05f5df911f2795c/data`,
-        subsitutionFn: (json) => {
-          json.operationalLayers[0].layerDefinition.definitionExpression = `ID = '${zipFeature.attributes.ID}'`;
-        }
-      },
-      {
-        url: `chart_details_1767799538210.json`,
+        url: `chart_details_1767640457126.json`,
         subsitutionFn: (json) => {
           console.log("Modifying chart data JSON:", json);
           json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
@@ -134,6 +127,30 @@ async function main() {
           json.inlineData.dataItems[1].field1 = stateFeature.attributes.MEDHINC_CY;
           json.inlineData.dataItems[2].category = nationFeature.attributes.NAME;
           json.inlineData.dataItems[2].field1 = nationFeature.attributes.MEDHINC_CY;
+        }
+      },
+      {
+        url: `chart_details_1766431733422.json`,
+        subsitutionFn: (json) => {
+          console.log("Modifying chart data JSON:", json);
+          json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
+          json.inlineData.dataItems[0].field1 = zipFeature.attributes.MEDVAL_CY;
+          json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
+          json.inlineData.dataItems[1].field1 = stateFeature.attributes.MEDVAL_CY;
+          json.inlineData.dataItems[2].category = nationFeature.attributes.NAME;
+          json.inlineData.dataItems[2].field1 = nationFeature.attributes.MEDVAL_CY;
+        }
+      },
+      {
+        url: `chart_details_1766431642044.json`,
+        subsitutionFn: (json) => {
+          console.log("Modifying chart data JSON:", json);  
+          json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
+          json.inlineData.dataItems[0].field1 = zipFeature.attributes.HAI_CY;
+          json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
+          json.inlineData.dataItems[1].field1 = stateFeature.attributes.HAI_CY;
+          json.inlineData.dataItems[2].category = nationFeature.attributes.NAME;
+          json.inlineData.dataItems[2].field1 = nationFeature.attributes.HAI_CY;
         }
       },
       {
@@ -203,31 +220,28 @@ async function main() {
             const node = json.publishedData.nodes[nodeId];
             console.log(node.type, nodeId, node);
             switch(nodeId) {
-              case 'n-zjAbcQ':
-                node.data.text = `Housing Affordability Comparison for Zip Code ${zipFeature.attributes.ID}!`;
+              case 'n-93Bl6H':
+                node.data.title = zipFeature.attributes.MEDHINC_CY.toLocaleString();
+                node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
-              case 'n-7gwpks':
-                node.data.text = node.data.text.replace(/^.*?(?=<a)/, "To change zip codes, ");
+              case 'n-qeiFVu':
+                node.data.title = zipFeature.attributes.MEDVAL_CY.toLocaleString();
+                node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
-              case 'n-s5BlpJ':
-                node.data.caption = `Zip code ${zipFeature.attributes.ID} (${zipFeature.attributes.NAME}, ${zipFeature.attributes.ST_ABBREV})`;
+              case 'n-INkYub':
+                node.data.title = zipFeature.attributes.HAI_CY.toFixed(0);
+                node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
-              case 'n-HG38Yi':
-                // headers
-                node.data.cells[0][1].value = zipFeature.attributes.ID;
-                node.data.cells[0][2].value = stateFeature.attributes.NAME;
-                // median home value
-                node.data.cells[1][1].value = zipFeature.attributes.MEDVAL_CY.toLocaleString();
-                node.data.cells[1][2].value = stateFeature.attributes.MEDVAL_CY.toLocaleString();
-                node.data.cells[1][3].value = nationFeature.attributes.MEDVAL_CY.toLocaleString();
-                // median household income
-                node.data.cells[2][1].value = zipFeature.attributes.MEDHINC_CY.toLocaleString();
-                node.data.cells[2][2].value = stateFeature.attributes.MEDHINC_CY.toLocaleString();
-                node.data.cells[2][3].value = nationFeature.attributes.MEDHINC_CY.toLocaleString();
-                // affordability index
-                node.data.cells[3][1].value = zipFeature.attributes.HAI_CY.toFixed(0);
-                node.data.cells[3][2].value = stateFeature.attributes.HAI_CY.toFixed(0);
-                node.data.cells[3][3].value = nationFeature.attributes.HAI_CY.toFixed(0);
+              case 'n-QrtD62':
+                console.log("Modifying ZIP change link:", node.data);
+                // Change href to # to make the link easily findable
+                if (node.data && node.data.text) {
+                  // Find and modify any links in the text content
+                  node.data.text = node.data.text.replace(
+                    /(<a[^>]*)(href="[^"]*")([^>]*>)/gi,
+                    '$1href="#"$3'
+                  );
+                }
                 break;
               default:
                 break;
@@ -247,13 +261,12 @@ async function main() {
   s.setAttribute("data-root-node", ".storymaps-root");
   document.body.appendChild(s);
 
-  // override the first occurence of hyperlink to run the promptZipChange function
-  // on click
+  // override the hyperlink with href="#" to open the ZIP modal
 
   waitForElement(
-    '.storymaps-root a', 
+    'a[href="#"]', 
     (link) => {
-        link.href = "#"; // Enables keyboard focus and enter key
+        console.log("Found target link:", link);
         link.addEventListener("click", (e) => {
           e.preventDefault();
           handleFindZip();
