@@ -1,10 +1,9 @@
 import './style.css'
-import { fetchZipDetails, getZipByGeoLocation } from './zipService.js'
-import { fetchFeatureByLatLon } from './censusApi.js'
+import { fetchFeatureByID, fetchFeatureByLatLon } from './censusApi.js'
 import { displayErrorMessage, showTemporaryMessage } from './ui.js'
 import { showZipModal } from './zipModal.js'
 import { CENSUS_CONFIG } from './config.js'
-import { redirectToZip, waitForElement } from './utils.js'
+import { redirectToZip, waitForElement, getLatLonByGeoLocation } from './utils.js'
 import { createStoryProxy } from './storyProxy.js'
 
 const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
@@ -44,39 +43,28 @@ async function main() {
     debugMessage(`⚠️ No ZIP param provided.`);
     debugMessage(`Attempting geolocation...`);
 
-    const zipByGeoLocation = await getZipByGeoLocation();
-
-    if (zipByGeoLocation) {
-        debugMessage(`ZIP found: ${zipByGeoLocation}`);
-        debugMessage("Redirecting...");
-        redirectToZip(zipByGeoLocation, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
+    const latLon = await getLatLonByGeoLocation();
+    let zipToUse = DEFAULT_ZIP;
+    
+    if (latLon) {
+        const zipPreview = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
+        if (zipPreview?.attributes?.ID) {
+          zipToUse = zipPreview.attributes.ID;
+          debugMessage(`ZIP found: ${zipToUse}`);
+        } else {
+          debugMessage(`⚠️ No ZIP found for location.`);
+        }
     } else {
-        debugMessage(`⚠️ No ZIP found for location.`);
-        debugMessage(`Defaulting to ZIP ${DEFAULT_ZIP}...`);
-        debugMessage("Redirecting...");
-        redirectToZip(DEFAULT_ZIP, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
+        debugMessage(`⚠️ Geolocation failed.`);
     }
+    
+    debugMessage(`Using ZIP ${zipToUse}...`);
+    debugMessage("Redirecting...");
+    redirectToZip(zipToUse, DEBUG_MODE && DEBUG_MESSAGE_DURATION);
 
     return;
 
   }
-
-  const zipDetails = await fetchZipDetails(zipParam);
-  if (zipDetails === null) {
-    showTemporaryMessage(`❌ Invalid ZIP code: ${zipParam}`);
-    showTemporaryMessage(`Please try again.`);
-    return;
-  }
-
-  const latLon = zipDetails?.centroid ? 
-                [zipDetails.centroid.y, zipDetails.centroid.x] : 
-                null;
-  // validate latLon
-  if (!latLon || latLon.length !== 2 || isNaN(latLon[0]) || isNaN(latLon[1])) {
-    showTemporaryMessage(`❌ Invalid lat/lon for ZIP code: ${zipParam}`);
-    showTemporaryMessage(`Please try again.`);
-    return;
-  }   
 
   // Show loading spinner for data query
   const loadingDiv = document.createElement('div');
@@ -91,10 +79,9 @@ async function main() {
 
   try {
 
-    zipFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url);
-    stateFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].state.url);
-    nationFeature = await fetchFeatureByLatLon(latLon, CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url);
-
+    zipFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url, "ID", zipParam, true);
+    stateFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].state.url, "ST_ABBREV", zipFeature.attributes.ST_ABBREV);
+    nationFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url, "ST_ABBREV", "US");
     // Remove loading spinner
     document.body.removeChild(loadingDiv);
 
@@ -189,7 +176,7 @@ async function main() {
             .filter(([_, resource]) => resource.type === "webmap")
             .forEach(([_, webmapResource]) => {
               console.log("Modifying webmap resource extent:", webmapResource);
-              console.log("Zip Feature:", zipDetails);
+              console.log("Zip Feature:", zipFeature);
 
               const bufferedExtent = (env, buffer = 0.01) => {
                 return {
@@ -201,8 +188,7 @@ async function main() {
                 };
               }
 
-              const extentWithBuffer = bufferedExtent(zipDetails.envelope, 0.02);
-
+              const extentWithBuffer = bufferedExtent(zipFeature.envelope, 0.02);
               webmapResource.data.viewpoint = {
                 rotation: 0,
                 scale: null,
