@@ -105,6 +105,13 @@ async function main() {
   const storyProxy = createStoryProxy(
     [
       {
+        url: `a522e87aaa1747b0af699d3b9fe7b21c/data`,
+        subsitutionFn: (json) => {
+          console.log("Modifying web map JSON:", json);
+          json.operationalLayers[2].customParameters.where = `ZIP_STRING=${zipFeature.attributes.ID}`;
+        }
+      },
+      {
         url: `chart_details_1767640457126.json`,
         subsitutionFn: (json) => {
           console.log("Modifying chart data JSON:", json);
