@@ -195,7 +195,7 @@ async function main() {
                 };
               }
 
-              const extentWithBuffer = bufferedExtent(zipFeature.envelope, 0.02);
+              const extentWithBuffer = bufferedExtent(zipFeature.envelope, 0.3);
               webmapResource.data.viewpoint = {
                 rotation: 0,
                 scale: null,
