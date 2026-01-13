@@ -1,11 +1,8 @@
 /**
  * Display an error message for failed data requests
- * @param {number[]} latLon - Array containing latitude and longitude coordinates
  * @param {Error} error - Error object with message
  */
-export const displayErrorMessage = (latLon, error) => {
-  const lat = latLon[0];
-  const lon = latLon[1];
+export const displayErrorMessage = (error) => {
   const errorDiv = document.createElement('div');
   errorDiv.style.cssText = `
     padding: 20px;
@@ -19,7 +16,6 @@ export const displayErrorMessage = (latLon, error) => {
   `;
   errorDiv.innerHTML = `
     <h3>Error Loading Data</h3>
-    <p>Failed to fetch census tract data for coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}</p>
     <p><em>${error.message}</em></p>
   `;
   document.body.insertBefore(errorDiv, document.body.firstChild);

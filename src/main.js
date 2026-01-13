@@ -80,24 +80,27 @@ async function main() {
   try {
 
     zipFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].zip.url, "ID", zipParam, true);
+    if (!zipFeature) {
+      throw new Error(`No data found for ZIP code: ${zipParam}`);
+    }
     stateFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].state.url, "ST_ABBREV", zipFeature.attributes.ST_ABBREV);
     nationFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url, "ST_ABBREV", "US");
-    // Remove loading spinner
-    document.body.removeChild(loadingDiv);
 
     if (zipFeature && stateFeature && nationFeature) {
       console.log("Data retrieval successful.");      
     } else {
-      console.log("No zip data found for coordinates:", latLon);
+      throw new Error("Failed to retrieve all necessary data features.");
     }
       
   } catch (error) {
-    // Remove loading spinner on error
+    console.error("Error fetching data:", error);
+    displayErrorMessage(error);
+    return;
+  } finally {
+    // Remove loading spinner in all cases
     if (document.body.contains(loadingDiv)) {
       document.body.removeChild(loadingDiv);
     }
-    console.error("Error fetching data:", error);
-    displayErrorMessage(latLon[0], latLon[1], error);
   }
 
   // Set up fetch proxy with custom substitution logic
