@@ -237,11 +237,21 @@ async function main() {
             debugLog(node.type, nodeId, node);
             switch(nodeId) {
               case 'n-93Bl6H':
-                node.data.title = zipFeature.attributes.MEDHINC_CY.toLocaleString();
+                node.data.title = zipFeature.attributes.MEDHINC_CY.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                });
                 node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
               case 'n-qeiFVu':
-                node.data.title = zipFeature.attributes.MEDVAL_CY.toLocaleString();
+                node.data.title = zipFeature.attributes.MEDVAL_CY.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                });
                 node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
               case 'n-INkYub':
