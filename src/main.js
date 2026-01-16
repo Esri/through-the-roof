@@ -9,6 +9,7 @@ import { createStoryProxy } from './storyProxy.js'
 const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
 const DEBUG_MESSAGE_DURATION = 3000;
 const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
+const debugLog = DEBUG_MODE ? console.log : () => {};
 const STORY_ID = '4961e406d6364e198c71cdf3de491285';
 const RANDOM_ZIPS = [
   '33109', '94027', '90210', '11962', '31561',
@@ -23,7 +24,7 @@ const getRandomZip = () => {
 }
 
 // Debug: Check if API key is loaded
-//console.log('API Key loaded:', import.meta.env.VITE_ARCGIS_API_KEY ? 'Yes' : 'No');
+//debugLog('API Key loaded:', import.meta.env.VITE_ARCGIS_API_KEY ? 'Yes' : 'No');
 
 // Handle Find ZIP button click - show ZIP modal
 const handleFindZip = () => {
@@ -33,7 +34,7 @@ const handleFindZip = () => {
       redirectToZip(zipCode, 0, true);
     },
     () => {
-      console.log('ZIP search cancelled');
+      debugLog('ZIP search cancelled');
     }
   );
 };
@@ -112,7 +113,7 @@ async function main() {
     nationFeature = await fetchFeatureByID(CENSUS_CONFIG["Housing Affordability Index 2025"].nation.url, "ST_ABBREV", "US");
 
     if (zipFeature && stateFeature && nationFeature) {
-      console.log("Data retrieval successful.");      
+      debugLog("Data retrieval successful.");      
     } else {
       throw new Error("Failed to retrieve all necessary data features.");
     }
@@ -136,21 +137,21 @@ async function main() {
         /* map substitutions */
         url: `0bd47aab81d448a88d0b706c261b3931/data`,
         subsitutionFn: (json) => {
-          console.log("MODIFYING web map JSON:", json);
+          debugLog("MODIFYING web map JSON:", json);
           json.operationalLayers[5].layerDefinition.definitionExpression = `ID = '${zipFeature.attributes.ID}'`;
         }
       },
       {
         url: `a522e87aaa1747b0af699d3b9fe7b21c/data`,
         subsitutionFn: (json) => {
-          console.log("Modifying web map JSON:", json);
+          debugLog("Modifying web map JSON:", json);
           json.operationalLayers[2].customParameters.where = `ZIP_STRING=${zipFeature.attributes.ID}`;
         }
       },
       {
         url: `chart_details_1768335104571.json`,
         subsitutionFn: (json) => {
-          console.log("Modifying chart data JSON:", json);
+          debugLog("Modifying chart data JSON:", json);
           json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
           json.inlineData.dataItems[0].field1 = zipFeature.attributes.MEDHINC_CY;
           json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
@@ -162,7 +163,7 @@ async function main() {
       {
         url: `chart_details_1768339158481.json`,
         subsitutionFn: (json) => {
-          console.log("Modifying chart data JSON:", json);
+          debugLog("Modifying chart data JSON:", json);
           json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
           json.inlineData.dataItems[0].field1 = zipFeature.attributes.MEDVAL_CY;
           json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
@@ -174,7 +175,7 @@ async function main() {
       {
         url: `chart_details_1768339228364.json`,
         subsitutionFn: (json) => {
-          console.log("Modifying chart data JSON:", json);  
+          debugLog("Modifying chart data JSON:", json);  
           json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
           json.inlineData.dataItems[0].field1 = zipFeature.attributes.HAI_CY;
           json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
@@ -193,7 +194,7 @@ async function main() {
           Object.entries(json.publishedData.nodes)
             .filter(([_, resource]) => resource.type === "webmap")
             .forEach(([_, webmapNode], index) => {
-              console.log("Modifying webmap node extent:", webmapNode);
+              debugLog("Modifying webmap node extent:", webmapNode);
               if (index > 0) {
                 delete webmapNode.data.extent;
                 delete webmapNode.data.center;
@@ -207,8 +208,8 @@ async function main() {
           Object.entries(json.publishedData.resources)
             .filter(([_, resource]) => resource.type === "webmap")
             .forEach(([_, webmapResource]) => {
-              console.log("Modifying webmap resource extent:", webmapResource);
-              console.log("Zip Feature:", zipFeature);
+              debugLog("Modifying webmap resource extent:", webmapResource);
+              debugLog("Zip Feature:", zipFeature);
 
               const bufferedExtent = (env, buffer = 0.01) => {
                 return {
@@ -240,7 +241,7 @@ async function main() {
         
           for (const nodeId in json.publishedData.nodes) {
             const node = json.publishedData.nodes[nodeId];
-            console.log(node.type, nodeId, node);
+            debugLog(node.type, nodeId, node);
             switch(nodeId) {
               case 'n-93Bl6H':
                 node.data.title = zipFeature.attributes.MEDHINC_CY.toLocaleString();
@@ -255,12 +256,12 @@ async function main() {
                 node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
               case 'n-vhFhqc':
-                console.log("Modifying ZIP change button:", node.data);
+                debugLog("Modifying ZIP change button:", node.data);
                 // Change href to # to make the link easily findable
                 if (node?.data) node.data.link = '#';
                 break;
               case 'n-uUsrRp':
-                console.log("Modifying 'Surprise me' button:", node.data);
+                debugLog("Modifying 'Surprise me' button:", node.data);
                 // Change href to # to make the link easily findable
                 if (node?.data) node.data.link = '#';
                 break;
@@ -287,11 +288,11 @@ async function main() {
   waitForElement(
     '#n-2pk6Mt', 
     (parentDiv) => {
-        console.log("Found parent div:", parentDiv);
+        debugLog("Found parent div:", parentDiv);
         const links = parentDiv.querySelectorAll('a');
         if (links.length >= 1) {
           const firstLink = links[0];
-          console.log("Found first link:", firstLink);
+          debugLog("Found first link:", firstLink);
           firstLink.addEventListener("click", (e) => {
             e.preventDefault();
             handleFindZip();
@@ -305,7 +306,7 @@ async function main() {
         }
         if (links.length >= 2) {
           const secondLink = links[1];
-          console.log("Found second link:", secondLink);          
+          debugLog("Found second link:", secondLink);          
           secondLink.addEventListener("click", (e) => {
             e.preventDefault();
             handleSurpriseMe();
@@ -325,7 +326,7 @@ async function main() {
     (element) => {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('scroll')) {
-        console.log('Scrolling to element:', element);
+        debugLog('Scrolling to element:', element);
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } 
