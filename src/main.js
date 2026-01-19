@@ -96,8 +96,8 @@ async function main() {
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'loading';
   loadingDiv.innerHTML = `
-    <div class="spinner"></div>
-    <div class="spinner-text">Loading data...</div>
+    <div class="spinner-custom"></div>
+    <div class="spinner-text">Updating maps to reflect your selected location...</div>
   `;
   document.body.appendChild(loadingDiv);
 
@@ -120,13 +120,11 @@ async function main() {
       
   } catch (error) {
     console.error("Error fetching data:", error);
-    displayErrorMessage(error);
-    return;
-  } finally {
-    // Remove loading spinner in all cases
     if (document.body.contains(loadingDiv)) {
       document.body.removeChild(loadingDiv);
     }
+    displayErrorMessage(error);
+    return;
   }
 
   // Set up fetch proxy with custom substitution logic
@@ -331,6 +329,9 @@ async function main() {
       if (urlParams.has('scroll')) {
         debugLog('Scrolling to element:', element);
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      if (document.body.contains(loadingDiv)) {
+        document.body.removeChild(loadingDiv);
       }
     } 
   );
