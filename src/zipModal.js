@@ -56,13 +56,6 @@ export const showZipModal = (onSubmit, onCancel) => {
     
     <form id="zip-form">
       <div style="margin-bottom: 16px;">
-        <label for="zip-input" style="
-          display: block;
-          margin-bottom: 8px;
-          color: #333;
-          font-weight: bold;
-          font-size: 14px;
-        ">ZIP Code:</label>
         <input 
           type="text" 
           id="zip-input" 
@@ -103,7 +96,7 @@ export const showZipModal = (onSubmit, onCancel) => {
         <button type="submit" id="zip-submit-btn" style="
           padding: 10px 20px;
           border: none;
-          background-color: #007bff;
+          background-color: #276644;
           color: white;
           border-radius: 4px;
           cursor: pointer;
