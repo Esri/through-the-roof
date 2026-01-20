@@ -1,9 +1,8 @@
 import './style.css'
 import { fetchFeatureByID, fetchFeatureByLatLon } from './arcgisRestApi.js'
-import { displayErrorMessage, showTemporaryMessage } from './ui.js'
 import { showZipModal } from './zipModal.js'
 import { CENSUS_CONFIG } from './config.js'
-import { redirectToZip, waitForElement, getLatLonByGeoLocation } from './utils.js'
+import { redirectToZip, waitForElement, getLatLonByGeoLocation, displayErrorMessage, showTemporaryMessage } from './utils.js'
 import { createStoryProxy } from './storyProxy.js'
 
 const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
