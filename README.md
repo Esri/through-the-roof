@@ -1,6 +1,6 @@
-# Mind the gap
+# Through the roof
 
-![Mind the gap](mind-the-gap.png)
+![Through the roof](through-the-roof.png)
 
 It's said that money makes the world go round — but for most American households, paychecks aren't stretching as far as they once did.
 
@@ -19,8 +19,8 @@ This enhanced ArcGIS StoryMaps project embeds a story via script and does the fo
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/esri/mind-the-gap.git
-   cd mind-the-gap
+   git clone https://github.com/esri/through-the-roof.git
+   cd through-the-roof
    ```
 
 2. **Install dependencies**
