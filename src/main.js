@@ -43,27 +43,6 @@ const RANDOM_ZIPS = [
 const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
 const debugLog = DEBUG_MODE ? console.log : () => {};
 const getRandomZip = () => RANDOM_ZIPS[Math.floor(Math.random() * RANDOM_ZIPS.length)];
-
-// Handle Find ZIP button click - show ZIP modal
-const handleFindZip = () => {
-  showZipModal(
-    async (zipCode) => {
-      // Verify ZIP exists by making API call
-      const zipFeature = await fetchFeatureByID(SERVICE_URL_ZIP, "ID", zipCode, false);
-      return !!zipFeature;
-    },
-    (zipCode) => {
-      // ZIP is valid, proceed with redirect
-      redirectToZip(zipCode, 0, true);
-    },
-    () => {
-      debugLog('ZIP search cancelled');
-    }
-  );
-};
-
-// Handle Surprise Me button click - pick random ZIP and redirect
-const handleSurpriseMe = () => {redirectToZip(getRandomZip(), 0, true);};
           
 async function main() {
 
@@ -305,6 +284,25 @@ async function main() {
   document.body.appendChild(s);
 
   // find the "Change ZIP code" and "Surprise me" links and attach handlers
+
+  const handleFindZip = () => {
+    showZipModal(
+      async (zipCode) => {
+        // Verify ZIP exists by making API call
+        const zipFeature = await fetchFeatureByID(SERVICE_URL_ZIP, "ID", zipCode, false);
+        return !!zipFeature;
+      },
+      (zipCode) => {
+        // ZIP is valid, proceed with redirect
+        redirectToZip(zipCode, 0, true);
+      },
+      () => {
+        debugLog('ZIP search cancelled');
+      }
+    );
+  };
+
+  const handleSurpriseMe = () => {redirectToZip(getRandomZip(), 0, true);};
 
   waitForElement(
     '#n-2pk6Mt', 
