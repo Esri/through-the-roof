@@ -327,6 +327,8 @@ async function main() {
     } 
   );
 
+  waitForElement('#n-ES3CjW button',(element)=>{element.style.display = 'none'})
+
 }
 
 main();
