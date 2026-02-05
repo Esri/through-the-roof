@@ -142,7 +142,7 @@ async function main() {
         url: `a522e87aaa1747b0af699d3b9fe7b21c/data`,
         subsitutionFn: (json) => {
           debugLog("Modifying web map JSON:", json);
-          json.operationalLayers[2].customParameters.where = `ZIP_STRING=${zipFeature.attributes.ID}`;
+          json.operationalLayers[2].customParameters.where = `ZIP_STRING='${zipFeature.attributes.ID}'`;
         }
       },
       {
