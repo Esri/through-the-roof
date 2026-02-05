@@ -18,10 +18,11 @@ limitations under the License.
 
 /**
  * Create and show a modal for ZIP code input
- * @param {Function} onSubmit - Callback function when ZIP is submitted, receives zipCode string
+ * @param {Function} validateZipExists - Async function to validate ZIP exists, receives zipCode string, returns boolean
+ * @param {Function} onSuccess - Callback function when ZIP is valid, receives zipCode string
  * @param {Function} onCancel - Callback function when modal is cancelled
  */
-export const showZipModal = (onSubmit, onCancel) => {
+export const showZipModal = (validateZipExists, onSuccess, onCancel) => {
   // Create modal overlay
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -187,7 +188,7 @@ export const showZipModal = (onSubmit, onCancel) => {
   };
   
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const zipCode = input.value.trim();
@@ -201,9 +202,30 @@ export const showZipModal = (onSubmit, onCancel) => {
     // Clean up the ZIP code (ensure 5-digit format for consistency)
     const cleanZip = zipCode.replace(/[^0-9]/g, '').slice(0, 5);
     
-    // Close modal and call onSubmit with the ZIP code
-    document.body.removeChild(overlay);
-    onSubmit(cleanZip);
+    // Disable submit button and show loading
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Validating...';
+    
+    try {
+      // Call the validation function
+      const isValid = await validateZipExists(cleanZip);
+      
+      if (isValid) {
+        // Close modal and call onSuccess with the ZIP code
+        document.body.removeChild(overlay);
+        onSuccess(cleanZip);
+      } else {
+        showError(`${cleanZip} is not a valid ZIP code -- try again`);
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Search';
+      }
+    } catch (error) {
+      showError(`${cleanZip} is not a valid ZIP code -- try again`);
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Search';
+    }
   };
   
   // Handle cancel/close

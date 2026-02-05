@@ -50,8 +50,13 @@ const getRandomZip = () => {
 // Handle Find ZIP button click - show ZIP modal
 const handleFindZip = () => {
   showZipModal(
+    async (zipCode) => {
+      // Verify ZIP exists by making API call
+      const zipFeature = await fetchFeatureByID(SERVICE_URL_ZIP, "ID", zipCode, false);
+      return !!zipFeature;
+    },
     (zipCode) => {
-      // zipCode is a clean 5-digit string like "12345"
+      // ZIP is valid, proceed with redirect
       redirectToZip(zipCode, 0, true);
     },
     () => {
