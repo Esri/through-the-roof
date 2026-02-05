@@ -179,20 +179,17 @@ async function main() {
         subsitutionFn: (json) => {
           const chartTitle = json.chartConfig?.title?.content?.text?.toLowerCase();
           debugLog("Modifying chart data JSON:", json.chartConfig?.title?.content?.text);
-          let fieldName;
-          if (chartTitle?.includes('income')) {
-            debugLog("Processing income chart");
-            fieldName = 'MEDHINC_CY';
-          } else if (chartTitle?.includes('value')) {
-            debugLog("Processing value chart");
-            fieldName = 'MEDVAL_CY';
-          } else if (chartTitle?.includes('affordability')) {
-            debugLog("Processing affordability chart");
-            fieldName = 'HAI_CY';
-          } else {
+
+          const fieldName = chartTitle?.includes('income') ? 'MEDHINC_CY' :
+                            chartTitle?.includes('value') ? 'MEDVAL_CY' :
+                            chartTitle?.includes('affordability') ? 'HAI_CY' :
+                            null;
+
+          if (!fieldName) {
             debugLog("Unknown chart type:", json.chartConfig.title.content.text);            
-            displayErrorMessage(`Unknown chart type: ${json.chartConfig?.title?.content?.text}`);          
-          }
+            return;
+          };
+
           json.inlineData.dataItems[0].category = zipFeature.attributes.ID;
           json.inlineData.dataItems[0].field1 = zipFeature.attributes[fieldName];
           json.inlineData.dataItems[1].category = stateFeature.attributes.NAME;
