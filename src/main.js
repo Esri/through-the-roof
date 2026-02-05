@@ -42,14 +42,7 @@ const RANDOM_ZIPS = [
 
 const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
 const debugLog = DEBUG_MODE ? console.log : () => {};
-
-const getRandomZip = () => {
-  const randomIndex = Math.floor(Math.random() * RANDOM_ZIPS.length);
-  return RANDOM_ZIPS[randomIndex];
-}
-
-// Debug: Check if API key is loaded
-//debugLog('API Key loaded:', import.meta.env.VITE_ARCGIS_API_KEY ? 'Yes' : 'No');
+const getRandomZip = () => RANDOM_ZIPS[Math.floor(Math.random() * RANDOM_ZIPS.length)];
 
 // Handle Find ZIP button click - show ZIP modal
 const handleFindZip = () => {
@@ -70,12 +63,8 @@ const handleFindZip = () => {
 };
 
 // Handle Surprise Me button click - pick random ZIP and redirect
-const handleSurpriseMe = () => {
-  redirectToZip(getRandomZip(), 0, true);
-};
+const handleSurpriseMe = () => {redirectToZip(getRandomZip(), 0, true);};
           
-
-
 async function main() {
 
   // Parse the ZIP code from the query string
