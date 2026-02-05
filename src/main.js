@@ -22,22 +22,26 @@ import { showZipModal } from './zipModal.js'
 import { redirectToZip, waitForElement, getLatLonByGeoLocation, displayErrorMessage, showTemporaryMessage } from './utils.js'
 import { createStoryProxy } from './storyProxy.js'
 
-// Census data service URLs
+/****  config constants ****/
+
+const STORY_ID = '4961e406d6364e198c71cdf3de491285';
+
 const SERVICE_URL_ZIP = 'https://services8.arcgis.com/peDZJliSvYims39Q/ArcGIS/rest/services/USA_Latest_Esri_Demographics/FeatureServer/1';
 const SERVICE_URL_STATE = 'https://services8.arcgis.com/peDZJliSvYims39Q/ArcGIS/rest/services/USA_Latest_Esri_Demographics/FeatureServer/2';
 const SERVICE_URL_NATION = 'https://services8.arcgis.com/peDZJliSvYims39Q/ArcGIS/rest/services/USA_Latest_Esri_Demographics/FeatureServer/0';
 
 const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
 const DEBUG_MESSAGE_DURATION = 3000;
+
+const RANDOM_ZIPS = [
+  '33109', '94027', '90210', '11962', '31561', '98039', '96754', '99501', '20817',
+  '30327', '97034', '75205', '81435', '78704', '55406', '68104', '58201', '71048'
+];
+
+/****  end config constants ****/
+
 const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
 const debugLog = DEBUG_MODE ? console.log : () => {};
-const STORY_ID = '4961e406d6364e198c71cdf3de491285';
-const RANDOM_ZIPS = [
-  '33109', '94027', '90210', '11962', '31561',
-  '98039', '96754', '99501', '20817',
-  '30327', '97034', '75205', '81435', '78704',
-  '55406', '68104', '58201', '71048'
-];
 
 const getRandomZip = () => {
   const randomIndex = Math.floor(Math.random() * RANDOM_ZIPS.length);
