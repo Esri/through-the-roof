@@ -144,7 +144,7 @@ async function main() {
   // - the substitutionFn then performs the actual modifications.
   /**************************************************************/
 
-  const storyProxy = createStoryProxy(
+  window.fetch = createStoryProxy(
     [
       {
         /* content web map substitutions */
@@ -248,8 +248,6 @@ async function main() {
       }
     ]
   );
-
-  window.fetch = storyProxy;
 
   /*******************************************************/
   // The rest of the code is about embedding the story
