@@ -105,6 +105,8 @@ async function main() {
 
   let zipFeature, stateFeature, nationFeature;
 
+  // query for all the necessary features
+
   try {
 
     zipFeature = await fetchFeatureByID(SERVICE_URL_ZIP, "ID", zipParam, true);
@@ -129,7 +131,20 @@ async function main() {
     return;
   }
 
-  // Set up fetch proxy with custom substitution logic
+  /**************************************************************/
+  // Okay, this is the crux of the whole operation:
+  //
+  // The createStoryProxy function intercepts StoryMaps fetch requests 
+  // before they're processed by the presentation engine. This creates 
+  // an opportunity to perform substitutions on the json data based on 
+  // the information from the above queries.
+  //
+  // In the code below, 
+  // - the url parameter -- actually just a partial text
+  //   match -- identifies which json files to modify 
+  //   (there are several).
+  // - the substitutionFn then performs the actual modifications.
+  /**************************************************************/
 
   const storyProxy = createStoryProxy(
     [
@@ -207,26 +222,22 @@ async function main() {
             const node = json.publishedData.nodes[nodeId];
             debugLog(node.type, nodeId, node);
             switch(nodeId) {
-              case 'n-93Bl6H':
+              case 'n-93Bl6H': // median household income infographic
                 node.data.title = zipFeature.attributes.MEDHINC_CY.toLocaleString('en-US', currencyFormat);
                 node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
-              case 'n-qeiFVu':
+              case 'n-qeiFVu': // median home value infographic
                 node.data.title = zipFeature.attributes.MEDVAL_CY.toLocaleString('en-US', currencyFormat);
                 node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
-              case 'n-INkYub':
+              case 'n-INkYub': // housing affordability index infographic
                 node.data.title = zipFeature.attributes.HAI_CY.toFixed(0);
                 node.data.description = node.data.description.replace("[ZIP code]", zipFeature.attributes.ID);
                 break;
-              case 'n-vhFhqc':
-                debugLog("Modifying ZIP change button:", node.data);
-                // Change href to # to make the link easily findable
+              case 'n-vhFhqc': // 'Change zip code button' - modify href to # to make the link easily findable
                 if (node?.data) node.data.link = '#';
                 break;
-              case 'n-uUsrRp':
-                debugLog("Modifying 'Surprise me' button:", node.data);
-                // Change href to # to make the link easily findable
+              case 'n-uUsrRp': // 'Surprise me button' - modify href to # to make the link easily findable
                 if (node?.data) node.data.link = '#';
                 break;
               default:
