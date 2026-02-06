@@ -53,7 +53,7 @@ async function main() {
   /*******************************************/
   // ensure that we have a zip to work with...
   /*******************************************/
-  
+
   // Parse the ZIP code from the query string
 
   const zipParam = new URLSearchParams(window.location.search).get("zip");
@@ -270,6 +270,17 @@ async function main() {
   s.setAttribute("data-root-node", ".storymaps-root");
   document.body.appendChild(s);
 
+
+  // Remove loading spinner when story is ready
+  waitForElement(
+    '#n-mUAfln', // intro section
+    () => {
+      if (document.body.contains(loadingDiv)) {
+        document.body.removeChild(loadingDiv);
+      }
+    }
+  );
+
   // find the "Change ZIP code" and "Surprise me" links and attach handlers
   const handleFindZip = () => {
     showZipModal(
@@ -339,9 +350,6 @@ async function main() {
         const headerHeight = header ? header.offsetHeight+10 : 90;
         const targetPosition = absoluteElementTop - headerHeight;
         window.scrollTo({ top: targetPosition, behavior: 'smooth' });
-      }
-      if (document.body.contains(loadingDiv)) {
-        document.body.removeChild(loadingDiv);
       }
     } 
   );
