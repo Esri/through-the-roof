@@ -47,12 +47,16 @@ const currencyFormat = {
 const debugMessage = DEBUG_MODE ? showTemporaryMessage : () => {};
 const debugLog = DEBUG_MODE ? console.log : () => {};
 const getRandomZip = () => RANDOM_ZIPS[Math.floor(Math.random() * RANDOM_ZIPS.length)];
-          
-async function main() {
 
-  /*******************************************/
-  // ensure that we have a zip to work with...
-  /*******************************************/
+/************************************************************/
+/****************** begin main driver ***********************/
+/************************************************************/
+          
+(async () => { // (using async IIFE syntax)
+
+  /**********************************************/
+  // 1) ensure that we have a zip to work with...
+  /**********************************************/
 
   // Parse the ZIP code from the query string
 
@@ -62,8 +66,8 @@ async function main() {
 
     // if zipParam doesn't exist; redirect page to a fallback zip, using the 
     // following logic:
-    // 1. Attempt geolocation to get lat/lon and fetch ZIP
-    // 2. If geolocation fails, use a random ZIP from the list
+    // a. Attempt geolocation to get lat/lon and fetch ZIP
+    // b. If geolocation fails, use a random ZIP from the list
 
     debugMessage(`⚠️ No ZIP param provided.`);
     debugMessage(`Attempting geolocation...`);
@@ -94,7 +98,7 @@ async function main() {
   }
 
   /**************************************************************************/
-  // if we made it to here without a redirect, then we have a zipParam to use!
+  // 2) if we made it to here without a redirect, then we have a zipParam to use!
   // time to go to work...
   /**************************************************************************/
 
@@ -135,7 +139,7 @@ async function main() {
   }
 
   /**************************************************************/
-  // Okay, this is the crux of the whole operation:
+  // 3) Okay, this is the crux of the whole operation:
   //
   // The createStoryProxy function intercepts StoryMaps fetch requests 
   // before they're processed by the presentation engine. This creates 
@@ -255,7 +259,7 @@ async function main() {
   );
 
   /*******************************************************/
-  // The rest of the code is about embedding the story
+  // 4) The rest of the code is about embedding the story
   // and wiring up a few UI elements once the DOM is ready 
   /*******************************************************/
 
@@ -357,6 +361,4 @@ async function main() {
   // Hide the expand button for the locator map
   waitForElement('#n-ES3CjW button',(element)=>{element.style.display = 'none'})
 
-}
-
-main();
+})(); // end main driver
