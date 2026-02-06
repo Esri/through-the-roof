@@ -50,6 +50,10 @@ const getRandomZip = () => RANDOM_ZIPS[Math.floor(Math.random() * RANDOM_ZIPS.le
           
 async function main() {
 
+  /*******************************************/
+  // ensure that we have a zip to work with...
+  /*******************************************/
+  
   // Parse the ZIP code from the query string
 
   const zipParam = new URLSearchParams(window.location.search).get("zip");
@@ -89,8 +93,10 @@ async function main() {
 
   }
 
+  /**************************************************************************/
   // if we made it to here without a redirect, then we have a zipParam to use!
   // time to go to work...
+  /**************************************************************************/
 
   // Show loading spinner for data query
   const loadingDiv = document.createElement('div');
@@ -106,7 +112,6 @@ async function main() {
   // query for all the necessary features
 
   try {
-
     zipFeature = await fetchFeatureByID(SERVICE_URL_ZIP, "ID", zipParam, true);
     if (!zipFeature) {
       throw new Error(`No data found for ZIP code: ${zipParam}`);
